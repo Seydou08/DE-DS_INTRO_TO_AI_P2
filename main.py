@@ -1,6 +1,6 @@
 from src.loader import load_data
 from src.cleaner import clean_data
-from setup_data import setup_data
+
 from src.features import create_time_features, encode
 from src.preprocess import save_procesed_data, print_summary
 
