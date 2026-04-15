@@ -33,3 +33,5 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
             df[col] = df[col].fillna(df[col].median())
 
     return df
+
+

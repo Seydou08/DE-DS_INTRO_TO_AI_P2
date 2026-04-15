@@ -49,11 +49,29 @@ def load_class_weights():
 
 
 def split(df):
+    # Remove raw datetime if it still exists
+    if "Start_Time" in df.columns:
+        df = df.drop(columns=["Start_Time"])
+
+    # Drop all remaining non-numeric columns except target
+    bad_cols = df.drop(columns=["Severity"]).select_dtypes(
+        exclude=["number", "bool"]
+    ).columns.tolist()
+
+    if bad_cols:
+        print(f"\nDropping non-numeric columns: {bad_cols}")
+        df = df.drop(columns=bad_cols)
+
     X = df.drop(columns=["Severity"])
     y = df["Severity"]
-    return train_test_split(X, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE)
 
-
+    print(f"\nFinal training shape: {X.shape}")
+    return train_test_split(
+        X, y,
+        test_size=TEST_SIZE,
+        stratify=y,
+        random_state=RANDOM_STATE
+    )
 def train(X_train, y_train, class_weights):
     clf = DecisionTreeClassifier(
         max_depth=MAX_DEPTH,
@@ -62,6 +80,9 @@ def train(X_train, y_train, class_weights):
         random_state=RANDOM_STATE,
     )
     print(f"Training Decision Tree (max_depth={MAX_DEPTH}, min_samples_leaf=50)...")
+    bad_cols = X_train.select_dtypes(exclude=["number", "bool"]).columns.tolist()
+    if bad_cols:
+        raise ValueError(f"Non-numeric columns still present: {bad_cols}")
     clf.fit(X_train, y_train)
     print("  Done.\n")
     return clf
